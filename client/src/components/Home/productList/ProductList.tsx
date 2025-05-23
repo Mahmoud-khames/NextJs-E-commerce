@@ -5,50 +5,63 @@ import { IProduct } from "@/types/type";
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { fetchProducts } from "@/redux/features/prodect/prodectSlice";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
-export default function ProductList({ t, locale }: { t: any; locale: string }) {
-  const products = useAppSelector((state) => state.products.products);
-  const status = useAppSelector((state) => state.products.status);
-  const dispatch = useAppDispatch();
+export default function ProductList({ t, locale, filter = {} }: { 
+  t: any; 
+  locale: string;
+  filter?: { bestSelling?: boolean }
+}) {
+  const [products, setProducts] = useState<IProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const apiURL = process.env.NEXT_PUBLIC_API_URL;
+  const { status } = useAppSelector((state) => state.products);
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const fetchProducts = async () => {
       try {
         setIsLoading(true);
-        await dispatch(fetchProducts()).unwrap();
+        // Use the best selling endpoint if bestSelling is true
+        const endpoint = filter?.bestSelling 
+          ? `${apiURL}/api/product/bestselling` 
+          : `${apiURL}/api/product`;
+        
+        const response = await axios.get(endpoint);
+        if (response.data.success) {
+          setProducts(response.data.data);
+        }
       } catch (error) {
-        console.error("Error loading products:", error);
+        console.error("Error fetching products:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadProducts();
-  }, [dispatch]);
+    fetchProducts();
+  }, [apiURL, filter?.bestSelling]);
 
   return (
-    <div className="w-full overflow-x-auto">
-      {/* Wrapper for horizontal scroll */}
-      <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[30px] justify-items-center">
+    <div className="w-full">
+      {/* Responsive grid for products */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-[30px] justify-items-center">
         {isLoading || status === "loading" ? (
-          // عرض هياكل عظمية أثناء التحميل
+          // Skeletons during loading
           Array(4).fill(0).map((_, index) => (
             <ProductCardSkeleton key={index} />
           ))
         ) : (
-          // عرض المنتجات بعد التحميل
+          // Products after loading
           products.slice(0, 4).map((product: IProduct) => (
             <ProductCard key={product._id} product={product} />
           ))
         )}
       </div>
-
-      {/* View All Products Button */}
-      <div className="flex justify-center w-full mt-14">
+      
+      {/* View All button - make it responsive */}
+      <div className="flex justify-center w-full mt-8 md:mt-10">
         <Link
           href={`/${locale}/products`}
-          className="bg-secondary text-white px-8 py-3 rounded text-[14px] md:text-[16px] font-medium hover:bg-[#c13535] transition-colors cursor-pointer"
+          className="bg-secondary text-white px-6 md:px-8 py-2.5 md:py-3 rounded text-sm md:text-base font-medium hover:bg-[#c13535] transition-colors cursor-pointer"
         >
           {t.home.viewAll}
         </Link>

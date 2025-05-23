@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
@@ -19,6 +20,7 @@ const contactRouter = require("./routes/contactRouter");
 const reviewRouter = require("./routes/reviewRouter");
 const cartRouter = require("./routes/cartRoutes");
 const wishlistRouter = require("./routes/wishlistRoutes");
+const stripeRouter = require("./routes/stripeRouter");
 
 // Environment
 dotenv.config();
@@ -27,11 +29,17 @@ dotenv.config();
 app.use(
   cors({
     origin: "http://localhost:3000", // Match your frontend URL
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE"], 
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 ); 
-app.use(express.json());
+app.use((req, res, next) => {
+  if (req.originalUrl === '/api/stripe/webhook') {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
@@ -57,12 +65,15 @@ app.use("/api/contact", contactRouter);
 app.use("/api/review", reviewRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/wishlist", wishlistRouter);
+app.use("/api/stripe", stripeRouter);
 
 // Error handler
-app.use(errorHandler);
+app.use(errorHandler); 
 
 // Start server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Backend server is running on port ${PORT}!`);
+  console.log(`Stripe webhook endpoint: ${process.env.BACKEND_URL}/api/stripe/webhook`);
 });
+  

@@ -4,6 +4,18 @@ import Link from "@/components/link";
 import { getCurrentLocale } from "@/lib/getCurrentLocale";  
 import getTrans from "@/lib/translation";
 import { LanguageType } from "@/i18n.config";
+import { Metadata } from "next";
+import { getDictionary } from "@/lib/dictionary";
+import { Locale } from "@/i18n.config";
+
+export async function generateMetadata({ params }: { params: { locale: Locale } }): Promise<Metadata> {
+  const dictionary = await getDictionary(params.locale);
+  
+  return {
+    title: dictionary.metadata.contact.title,
+    description: dictionary.metadata.contact.description,
+  };
+}
 
 export default async function Contact() {
   const locale = await getCurrentLocale();

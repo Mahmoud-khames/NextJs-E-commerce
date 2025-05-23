@@ -4,9 +4,10 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getCategories } from "@/server";
 
 interface Category {
-  id: string;
+  _id: string;
   name: string;
   slug: string;
+  image:string
 }
 
 interface CategoryState {

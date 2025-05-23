@@ -29,10 +29,10 @@ export default function LoveProdects() {
 
   return (
     <Link href={`/${locale}/wishlist`} className="flex items-center justify-center relative cursor-pointer">
-      <div className="absolute h-5 w-5 bg-secondary text-white rounded-full bottom-4 -right-3 flex items-center justify-center">
+      <div className="absolute h-3.5 w-3.5 sm:h-4 sm:w-4 bg-secondary text-white rounded-full -top-1 -right-1 flex items-center justify-center text-[10px]">
         {wishlistCount}
       </div>
-      <Heart />
+      <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
     </Link>
   );
 }

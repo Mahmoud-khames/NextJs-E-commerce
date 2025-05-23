@@ -1,10 +1,21 @@
 import React from "react";
-import CartItems from "./_component/CartItems";
+import CartItems from "./_components/CartItems";
 import Link from "@/components/link";
 import Trans from "@/components/trans";
 import { getCurrentLocale } from "@/lib/getCurrentLocale";
+import { Metadata } from "next";
+import { getDictionary } from "@/lib/dictionary";
+import { Locale } from "@/i18n.config";
+import AuthCheck from "./_components/AuthCheck";
 
-
+export async function generateMetadata({ params }: { params: { locale: Locale } }): Promise<Metadata> {
+  const dictionary = await getDictionary(params.locale);
+  
+  return {
+    title: dictionary.metadata.cart.title,
+    description: dictionary.metadata.cart.description,
+  };
+}
 
 export default async function CartPage() {
   const t = await Trans()
@@ -22,7 +33,7 @@ export default async function CartPage() {
         </Link>
       </div>
       <div className="flex flex-col gap-4 mb-10">
-        <CartItems translations={{ cart, common }} locale={locale} />
+        <AuthCheck translations={{ cart, common }} locale={locale} />
       </div>
     </div>
   );

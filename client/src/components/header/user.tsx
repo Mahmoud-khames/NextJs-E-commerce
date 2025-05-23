@@ -16,6 +16,7 @@ import { logout } from "@/redux/features/user/userSlice";
 import { clearCart } from "@/redux/features/cart/cartSlice";
 import { clearWishlist } from "@/redux/features/wishList/wishlistSlice";
 import { useAppDispatch } from "@/redux/hooks";
+import Image from "next/image";
 
 interface UserProps {
   t: any;
@@ -34,15 +35,32 @@ export default function User({ t }: any) {
     dispatch(clearWishlist()); // Clear the wishlist when logging out
     router.push(`/${locale}`);
   };
+  const apiURL = process.env.NEXT_PUBLIC_API_URL;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div
-          className="bg-secondary rounded-full text-white w-8 h-8 flex items-center justify-center cursor-pointer"
+          className="bg-secondary rounded-full text-white w-6 h-6 md:w-8 md:h-8 flex items-center justify-center cursor-pointer"
           aria-label="User menu"
         >
-          <User2 />
+          {user ? (
+            <span className="text-sm font-medium">
+              {
+                <Image
+                  src={
+                    user?.userImage ? `${apiURL}${user?.userImage}` : "/user.jpg"
+                  }
+                  alt={user.firstName}
+                  width={50}
+                  height={50}
+                  className="rounded-full w-6 h-6 md:w-8 md:h-8 object-cover"
+                />
+              }
+            </span>
+          ) : (
+            <User2 className="w-4 h-4 md:w-5 md:h-5" />
+          )}
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
@@ -51,9 +69,7 @@ export default function User({ t }: any) {
             <DropdownMenuItem onClick={() => router.push(`/${locale}/profile`)}>
               {t.profile}
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleLogout}>
-              {t.logout}
-            </DropdownMenuItem>
+
             {user?.role === UserRole.ADMIN && (
               <DropdownMenuItem
                 onClick={() =>
@@ -63,13 +79,18 @@ export default function User({ t }: any) {
                 {t.dashboard}
               </DropdownMenuItem>
             )}
+            <DropdownMenuItem onClick={handleLogout}>
+              {t.logout}
+            </DropdownMenuItem>
           </>
         ) : (
           <>
             <DropdownMenuItem onClick={() => router.push(`/${locale}/login`)}>
               {t.login}
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push(`/${locale}/register`)}>
+            <DropdownMenuItem
+              onClick={() => router.push(`/${locale}/register`)}
+            >
               {t.register}
             </DropdownMenuItem>
           </>

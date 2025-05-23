@@ -79,6 +79,7 @@ class Auth {
                 });
             }
           } catch (err) {
+            console.log(err)
             return next(new AppError("Something went wrong", 500));
           }
         }
@@ -90,6 +91,7 @@ class Auth {
           lastName: "",
           email: "Email is not valid",
         };
+        console.log(error);
         return next(new AppError(error, 400)); 
       }
     }

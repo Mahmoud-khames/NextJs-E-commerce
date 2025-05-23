@@ -27,19 +27,23 @@ router.put(
   "/:uId",
   authMiddleware,
   isAdmin,
-  upload.any(), 
+  upload.any(),
   userController.postEditUser
 );
 router.delete("/:uId", authMiddleware, isAdmin, userController.getDeleteUser);
-
-
+router.get(
+  "/dashboard/count",
+  authMiddleware,
+  isAdmin,
+  userController.getUsersCount
+);
 
 // مسار جديد لإنشاء مستخدم جديد
 router.post(
   "/",
   authMiddleware,
   isAdmin,
-  upload.any(), 
+  upload.any(),
   userController.postAddUser
 );
 

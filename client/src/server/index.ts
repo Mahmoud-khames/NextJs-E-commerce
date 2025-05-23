@@ -32,7 +32,8 @@ export const updateProduct = (data: FormData, productSlug: string) =>
     },
   });
 export const getProduct = (slug: string) => api.get(`/api/product/${slug}`);
-export const deleteProduct = (slug: string) => api.delete(`/api/product/${slug}`);
+export const deleteProduct = (slug: string) =>
+  api.delete(`/api/product/${slug}`);
 export const searchProducts = (query: string) =>
   api.get(`/api/product/search/${query}`);
 
@@ -70,8 +71,22 @@ export const removeFromCart = (id: string) => api.delete(`/api/cart/${id}`);
 export const clearCart = () => api.delete("/api/cart/clear");
 
 // Order endpoints
-export const createOrder = (data) => api.post("/api/order", data);
+export const createOrder = (data: {
+  shippingAddress: string;
+  phoneNumber: string;
+  paymentMethod?: string;
+  couponApplied?: string;
+  discountAmount?: number;
+  totalAmount?: number;
+}) => api.post("/api/order", data);
+
 export const getOrders = () => api.get("/api/order");
+export const getUserOrders = () => api.get("/api/order/user");
+export const getOrderById = (id: string) => api.get(`/api/order/${id}`);
+export const updateOrderStatus = (id: string, status: string) => 
+  api.put(`/api/order/${id}`, { status });
+export const deleteOrder = (id: string) => api.delete(`/api/order/${id}`);
+
 
 // Review endpoints
 export const createReview = (data: {
@@ -81,6 +96,16 @@ export const createReview = (data: {
 }) => api.post("/api/review", data);
 export const getProductReviews = (productId: string) =>
   api.get(`/api/review/${productId}`);
+
+export const uploadReviewImage = (data: FormData) =>
+  api.post("/api/review/uploadReviewImage", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+export const deleteReview = (reviewId: string) =>
+  api.delete(`/api/review/${reviewId}`);
 
 // Wishlist endpoints
 export const getWishlistProducts = () => api.get("/api/wishlist");
@@ -123,6 +148,30 @@ export const updateCustomize = (data: FormData, id: string) =>
     },
   });
 
+// Dashboard stats endpoints
+export const getProductsCount = () => api.get("/api/product/dashboard/count");
+export const getOrdersCount = () => api.get("/api/order/dashboard/count");
+export const getUsersCount = () => api.get("/api/user/dashboard/count");
+
+// Coupon endpoints
+export const getAllCoupons = () => api.get("/api/coupon");
+export const getCouponById = (id: string) => api.get(`/api/coupon/${id}`);
+export const createCoupon = (data: {
+  code: string;
+  discount: number;
+  expiry: Date;
+  status: boolean;
+  maxUses: number;
+}) => api.post("/api/coupon", data);
+export const updateCoupon = (id: string, data: {
+  code?: string;
+  discount?: number;
+  expiry?: Date;
+  status?: boolean;
+  maxUses?: number;
+}) => api.put(`/api/coupon/${id}`, data);
+export const deleteCoupon = (id: string) => api.delete(`/api/coupon/${id}`);
+
 // إضافة معترض للتعامل مع أخطاء الشبكة بشكل أفضل
 api.interceptors.request.use(
   (config) => {
@@ -130,7 +179,12 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log("Request sent to:", config.url, "with baseURL:", api.defaults.baseURL); // Enhanced debug log
+    console.log(
+      "Request sent to:",
+      config.url,
+      "with baseURL:",
+      api.defaults.baseURL
+    ); // Enhanced debug log
     return config;
   },
   (error) => {
@@ -251,3 +305,12 @@ api.interceptors.request.use(
 //     return Promise.reject(error);
 //   }
 // );
+
+// إضافة وظائف Stripe
+export const createStripeCheckoutSession = async (data) => {
+  return await api.post("/api/stripe/create-checkout-session", data);
+};
+
+export const verifyStripePayment = async (sessionId) => {
+  return await api.get(`/api/stripe/verify-payment?session_id=${sessionId}`);
+};

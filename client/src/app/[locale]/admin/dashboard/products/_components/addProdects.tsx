@@ -34,6 +34,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import {
   Select,
@@ -44,21 +45,23 @@ import {
 } from "@/components/ui/select";
 import { PlusCircle } from "lucide-react";
 
-// تعريف مخطط التحقق باستخدام Zod
-
 export function AddProducts({ t, locale }: { t: any; locale: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const dispatch = useAppDispatch();
   const [open, setOpen] = useState(false);
   const { categories } = useAppSelector((state) => state.category);
-  const [hasDiscount, setHasDiscount] = useState(false);
   const [colorInput, setColorInput] = useState("");
   const [sizeInput, setSizeInput] = useState("");
   const [colors, setColors] = useState<string[]>([]);
   const [sizes, setSizes] = useState<string[]>([]);
   const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
   const [imagesPreview, setImagesPreview] = useState<string[]>([]);
+  const [hasDiscount, setHasDiscount] = useState(false);
+  const [discountType, setDiscountType] = useState<"fixed" | "percentage">(
+    "fixed"
+  );
+  const [discountDates, setDiscountDates] = useState(false);
   const productSchema = z.object({
     productName: z.string().min(3, { message: t.admin.minProductNameLength }),
     productDescription: z
@@ -71,6 +74,9 @@ export function AddProducts({ t, locale }: { t: any; locale: string }) {
       }),
     oldProductPrice: z.string().optional(),
     hasDiscount: z.boolean().default(false),
+    productDiscountPercentage: z.string().optional(),
+    productDiscountStartDate: z.string().optional(),
+    productDiscountEndDate: z.string().optional(),
     productCategory: z
       .string()
       .min(1, { message: t.admin.productCategoryRequired }),
@@ -80,25 +86,21 @@ export function AddProducts({ t, locale }: { t: any; locale: string }) {
         message: t.admin.invalidQuantity,
       }),
     productStatus: z.boolean().default(true),
+    NEW: z.boolean().default(true),
     productColors: z
       .array(z.string())
       .min(1, { message: t.admin.minProductColors }),
     productSizes: z
       .array(z.string())
       .min(1, { message: t.admin.minProductSizes }),
-    productImage: z
-      .any()
-      .refine((file) => file instanceof File, {
-        message: t.admin.mainImageRequired,
-      }),
-    productImages: z
-      .array(z.any())
-      .refine((files) => files.length > 0, {
-        message: t.admin.additionalImagesRequired,
-      }),
+    productImage: z.any().refine((file) => file instanceof File, {
+      message: t.admin.mainImageRequired,
+    }),
+    productImages: z.array(z.any()).refine((files) => files.length > 0, {
+      message: t.admin.additionalImagesRequired,
+    }),
   });
 
-  // إعداد نموذج React Hook Form مع Zod
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -107,14 +109,17 @@ export function AddProducts({ t, locale }: { t: any; locale: string }) {
       productPrice: "",
       oldProductPrice: "",
       hasDiscount: false,
+      productDiscountPercentage: "",
+      productDiscountStartDate: "",
+      productDiscountEndDate: "",
       productCategory: "",
       productQuantity: "",
       productStatus: true,
+      NEW: true,
       productColors: [],
       productSizes: [],
     },
   });
-
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
@@ -157,17 +162,55 @@ export function AddProducts({ t, locale }: { t: any; locale: string }) {
     }
   };
 
-  // إرسال النموذج
+  // تعديل وظيفة onSubmit لإرسال بيانات الخصم
   const onSubmit = (data: z.infer<typeof productSchema>) => {
     const formDataToSend = new FormData();
     formDataToSend.append("productName", data.productName);
     formDataToSend.append("productDescription", data.productDescription);
     formDataToSend.append("productPrice", data.productPrice);
 
-    if (data.hasDiscount && data.oldProductPrice) {
-      formDataToSend.append("oldProductPrice", data.oldProductPrice);
+    if (data.hasDiscount) {
+      if (discountType === "fixed" && data.oldProductPrice) {
+        formDataToSend.append("oldProductPrice", data.oldProductPrice);
+        // إضافة قيمة الخصم الثابت
+        if (parseFloat(data.productPrice) > parseFloat(data.oldProductPrice)) {
+          const fixedDiscount = parseFloat(data.productPrice) - parseFloat(data.oldProductPrice);
+          formDataToSend.append("productDiscount", fixedDiscount.toString());
+        }
+      } else if (discountType === "percentage") {
+        // إرسال النسبة المئوية للخصم
+        if (data.productDiscountPercentage) {
+          formDataToSend.append("productDiscountPercentage", data.productDiscountPercentage);
+        }
+        
+        // إرسال قيمة الخصم
+        if (data.productDiscount) {
+          formDataToSend.append("productDiscount", data.productDiscount);
+        }
+        
+        // إرسال تواريخ الخصم
+        if (discountDates) {
+          if (data.productDiscountStartDate) {
+            formDataToSend.append("productDiscountStartDate", data.productDiscountStartDate);
+          }
+          if (data.productDiscountEndDate) {
+            formDataToSend.append("productDiscountEndDate", data.productDiscountEndDate);
+          }
+        } else {
+          // إذا لم يتم تحديد تواريخ، نضع تواريخ افتراضية (من اليوم ولمدة شهر)
+          const today = new Date();
+          const nextMonth = new Date();
+          nextMonth.setMonth(today.getMonth() + 1);
+          
+          formDataToSend.append("productDiscountStartDate", today.toISOString());
+          formDataToSend.append("productDiscountEndDate", nextMonth.toISOString());
+        }
+      }
     } else {
+      // إذا لم يكن هناك خصم، نضع قيم افتراضية
       formDataToSend.append("oldProductPrice", "0");
+      formDataToSend.append("productDiscount", "0");
+      formDataToSend.append("productDiscountPercentage", "0");
     }
 
     formDataToSend.append("productColors", JSON.stringify(data.productColors));
@@ -175,6 +218,7 @@ export function AddProducts({ t, locale }: { t: any; locale: string }) {
     formDataToSend.append("productCategory", data.productCategory);
     formDataToSend.append("productQuantity", data.productQuantity);
     formDataToSend.append("productStatus", data.productStatus.toString());
+    formDataToSend.append("NEW", data.NEW.toString());
     formDataToSend.append("productImage", data.productImage);
 
     data.productImages.forEach((img: File) => {
@@ -187,16 +231,15 @@ export function AddProducts({ t, locale }: { t: any; locale: string }) {
         toast.success(
           response.data.message || t.admin.productCreatedSuccessfully
         );
-        dispatch(fetchProducts());
+        dispatch(fetchProducts({ applyFilters: false }));
         router.refresh();
-        
+        setOpen(false);
       } catch (error: any) {
         toast.error(error.message || t.common.error);
       }
     });
   };
 
-  
   const generateFakeImage = async (name = "product.jpg") => {
     const url = "https://picsum.photos/300/300";
     const response = await fetch(url);
@@ -226,9 +269,7 @@ export function AddProducts({ t, locale }: { t: any; locale: string }) {
     const oldProductPrice = faker.commerce.price();
     // Use _id instead of id and ensure categories structure is correct
     const randomCategory =
-      categories[
-        Math.floor(Math.random() * categories.length)
-      ];
+      categories[Math.floor(Math.random() * categories.length)];
     const productCategory = randomCategory?._id || ""; // Fallback to empty string if undefined
     const productQuantity = faker.number.int({ min: 1, max: 100 });
     // const productRating = faker.number.float({ min: 1, max: 5 });
@@ -269,8 +310,8 @@ export function AddProducts({ t, locale }: { t: any; locale: string }) {
         toast.success(
           response.data.message || t.admin.productCreatedSuccessfully
         );
-        dispatch(fetchProducts());
-        
+        dispatch(fetchProducts({ applyFilters: false }));
+
         setOpen(false);
         router.refresh();
       } catch (error: any) {
@@ -283,13 +324,13 @@ export function AddProducts({ t, locale }: { t: any; locale: string }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-secondary hover:bg-secondary/90 cursor-pointer">
-        <PlusCircle className="mr-2 h-4 w-4" />
-          {t.admin.AddProduct}
+          <PlusCircle className="mr-2 h-4 w-4" />
+          {t.admin.addProduct}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t.admin.AddProduct}</DialogTitle>
+          <DialogTitle>{t.admin.addProduct}</DialogTitle>
           <DialogDescription>{t.admin.AddProductDescription}</DialogDescription>
         </DialogHeader>
 
@@ -335,40 +376,207 @@ export function AddProducts({ t, locale }: { t: any; locale: string }) {
             </div>
 
             {/* خصم المنتج */}
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <Checkbox
-                id="hasDiscount"
-                checked={hasDiscount}
-                onCheckedChange={(checked) => {
-                  setHasDiscount(!!checked);
-                  form.setValue("hasDiscount", !!checked);
-                }}
-              />
-              <Label htmlFor="hasDiscount">
-                {t.admin.addDiscountToProduct}
-              </Label>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <Checkbox
+                  id="hasDiscount"
+                  checked={hasDiscount}
+                  onCheckedChange={(checked) => {
+                    setHasDiscount(!!checked);
+                    form.setValue("hasDiscount", !!checked);
+                  }}
+                />
+                <Label htmlFor="hasDiscount">
+                  {t.admin.addDiscountToProduct}
+                </Label>
+              </div>
+
+              {hasDiscount && (
+                <div className="space-y-4 p-4 border rounded-md">
+                  <div className="flex space-x-4 rtl:space-x-reverse">
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                      <input
+                        type="radio"
+                        id="fixedDiscount"
+                        checked={discountType === "fixed"}
+                        onChange={() => setDiscountType("fixed")}
+                      />
+                      <Label htmlFor="fixedDiscount">
+                        {t.admin.fixedDiscount}
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                      <input
+                        type="radio"
+                        id="percentageDiscount"
+                        checked={discountType === "percentage"}
+                        onChange={() => setDiscountType("percentage")}
+                      />
+                      <Label htmlFor="percentageDiscount">
+                        {t.admin.percentageDiscount}
+                      </Label>
+                    </div>
+                  </div>
+
+                  {discountType === "fixed" ? (
+                    <FormField
+                      control={form.control}
+                      name="oldProductPrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t.admin.oldProductPrice}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder={t.admin.enterOldProductPrice}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ) : (
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="productDiscountPercentage"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t.admin.discountPercentage}</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder={t.admin.enterDiscountPercentage}
+                                {...field}
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                  // حساب قيمة الخصم تلقائيًا عند تغيير النسبة المئوية
+                                  const percentage = parseFloat(e.target.value) || 0;
+                                  const price = parseFloat(form.getValues("productPrice")) || 0;
+                                  const discountAmount = price * (percentage / 100);
+                                  form.setValue("productDiscount", discountAmount.toString());
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="productDiscount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t.admin.discountAmount}</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder={t.admin.enterProductDiscount}
+                                {...field}
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                  // حساب النسبة المئوية تلقائيًا عند تغيير قيمة الخصم
+                                  const discountAmount = parseFloat(e.target.value) || 0;
+                                  const price = parseFloat(form.getValues("productPrice")) || 0;
+                                  if (price > 0) {
+                                    const percentage = (discountAmount / price) * 100;
+                                    form.setValue("productDiscountPercentage", percentage.toFixed(2));
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                        <Checkbox
+                          id="discountDates"
+                          checked={discountDates}
+                          onCheckedChange={(checked) => {
+                            setDiscountDates(!!checked);
+                          }}
+                        />
+                        <Label htmlFor="discountDates">
+                          {t.admin.setDiscountPeriod}
+                        </Label>
+                      </div>
+
+                      {discountDates && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="productDiscountStartDate"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  {t.admin.discountStartDate}
+                                </FormLabel>
+                                <FormControl>
+                                  <Input type="datetime-local" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="productDiscountEndDate"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>{t.admin.discountEndDate}</FormLabel>
+                                <FormControl>
+                                  <Input type="datetime-local" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+
+                      {/* عرض السعر بعد الخصم */}
+                      {form.watch("productDiscountPercentage") && form.watch("productPrice") && (
+                        <div className="p-3 bg-gray-50 rounded-md">
+                          <p className="text-sm font-medium">{t.admin.calculatedPrice}:</p>
+                          <p className="text-lg font-bold text-secondary">
+                            {(
+                              parseFloat(form.getValues("productPrice")) -
+                              parseFloat(form.getValues("productDiscount") || "0")
+                            ).toFixed(2)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* السعر القديم (يظهر فقط عند تفعيل الخصم) */}
-            {hasDiscount && (
+            {/* علامة منتج جديد */}
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <FormField
                 control={form.control}
-                name="oldProductPrice"
+                name="NEW"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t.admin.oldProductPrice}</FormLabel>
+                  <FormItem className="flex items-center space-x-2 rtl:space-x-reverse">
                     <FormControl>
-                      <Input
-                        type="number"
-                        placeholder={t.admin.enterOldProductPrice}
-                        {...field}
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormLabel>{t.admin.markAsNew}</FormLabel>
+                    <FormDescription>
+                      {t.admin.markAsNewDescription}
+                    </FormDescription>
                   </FormItem>
                 )}
               />
-            )}
+            </div>
 
             {/* وصف المنتج */}
             <FormField
@@ -408,9 +616,9 @@ export function AddProducts({ t, locale }: { t: any; locale: string }) {
                           />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="bg-white">
                         {categories?.map((category: any) => (
-                          <SelectItem key={category._id} value={category._id}>
+                          <SelectItem className="hover:bg-secondary hover:text-white" key={category._id} value={category._id}>
                             {category.name}
                           </SelectItem>
                         ))}

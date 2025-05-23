@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema(
     },
     userImage: { 
       type: String, 
-      default: "user.jpg",
+      default: "/backend/uploads/users/user.jpg",
     },
     verified: {
       type: String,

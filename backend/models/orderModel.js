@@ -1,49 +1,85 @@
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema.Types;
 
+const orderItemSchema = new mongoose.Schema({
+  product: {
+    type: ObjectId,
+    ref: "Product",
+    required: true
+  },
+  quantity: {
+    type: Number,
+    required: true,
+    min: 1
+  },
+  price: {
+    type: Number,
+    required: true
+  },
+  size: String,
+  color: String
+});
+
 const orderSchema = new mongoose.Schema(
   {
-    allProduct: [
-      {
-        id: { type: ObjectId, ref: "Product" },
-        quantitiy: Number,
-      },
-    ],
+    items: [orderItemSchema],
     user: {
       type: ObjectId,
       ref: "User",
       required: true,
     },
-    amount: {
+    totalAmount: {
       type: Number,
       required: true,
     },
-    transactionId: {
+    shippingAddress: {
       type: String,
       required: true,
     },
-    address: {
+    phoneNumber: {
       type: String,
       required: true,
     },
-    phone: {
+    paymentMethod: {
+      type: String,
+      enum: ["Cash on Delivery", "PayPal", "Stripe"],
+      default: "Cash on Delivery"
+    },
+    stripePaymentId: {
+      type: String,
+      default: null
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["Pending", "Paid", "Failed"],
+      default: "Pending"
+    },
+    couponApplied: {
+      type: String,
+      default: null
+    },
+    discountAmount: {
       type: Number,
-      required: true,
+      default: 0
     },
     status: {
       type: String,
-      default: "Not processed",
+      default: "Pending",
       enum: [
-        "Not processed",
+        "Pending",
         "Processing",
         "Shipped",
         "Delivered",
         "Cancelled",
       ],
     },
+    isDeleted: {
+      type: Boolean,
+      default: false
+    }
   },
   { timestamps: true }
 );
 
-const orderModel = mongoose.model("Order", orderSchema);
-module.exports = orderModel;
+const Order = mongoose.model("Order", orderSchema);
+module.exports = Order;

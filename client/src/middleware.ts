@@ -1,45 +1,57 @@
 import { NextRequest, NextResponse } from "next/server";
-import { i18n, LanguageType } from "./i18n.config";
+import { i18n } from "./i18n.config";
 
-function getLocale(request: NextRequest): string {
-  // 1. تحقق من اللغة في المسار (أولوية أعلى)
-  const pathname = request.nextUrl.pathname;
-  const pathLocale = i18n.locales.find(
-    (locale) =>
-      pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  );
-  if (pathLocale) {
-    return pathLocale;
-  }
-
-  // 2. تحقق من اللغة المحفوظة في cookies
-  const cookieLocale = request.cookies.get("language")?.value as LanguageType | undefined;
+// Get the preferred locale from request
+function getLocale(request: NextRequest) {
+  // Check for cookie first
+  const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
   if (cookieLocale && i18n.locales.includes(cookieLocale)) {
     return cookieLocale;
   }
 
-  // 3. استخدم Accept-Language من رأس الطلب
-  const acceptLanguage = request.headers.get("accept-language") || "";
-  const languages = acceptLanguage
-    .split(",")
-    .map((lang) => lang.split(";")[0].split("-")[0]);
-  const locale =
-    languages.find((lang) => i18n.locales.includes(lang as LanguageType)) ||
-    i18n.defaultLocale;
+  // Check Accept-Language header
+  const acceptLanguage = request.headers.get("Accept-Language") || "";
+  const locales = acceptLanguage.split(",")
+    .map(lang => lang.split(";")[0].trim())
+    .filter(lang => i18n.locales.some(locale => 
+      lang.startsWith(locale) || locale.startsWith(lang)
+    ));
 
-  return locale;
+  if (locales.length > 0) {
+    // Find the best match
+    for (const locale of locales) {
+      const exactMatch = i18n.locales.find(l => l === locale);
+      if (exactMatch) return exactMatch;
+      
+      const partialMatch = i18n.locales.find(l => 
+        locale.startsWith(l) || l.startsWith(locale)
+      );
+      if (partialMatch) return partialMatch;
+    }
+  }
+
+  // Default to the default locale
+  return i18n.defaultLocale;
 }
 
 export default async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  
+  // Skip middleware for static files and API routes
+  if (
+    pathname.startsWith("/_next") || 
+    pathname.startsWith("/api") ||
+    pathname.includes(".") // Static files like images, css, etc.
+  ) {
+    return NextResponse.next();
+  }
 
-  // تحقق مما إذا كان المسار يحتوي على لغة بالفعل (مثل /en/ أو /ar/)
+  // Check if path already has a locale
   const pathnameHasLocale = i18n.locales.some(
-    (locale) =>
-      pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );
 
-  // إذا كان المسار يحتوي على لغة، لا حاجة لإعادة توجيه
+  // If path already has locale, continue
   if (pathnameHasLocale) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-url", request.url);
@@ -51,13 +63,18 @@ export default async function middleware(request: NextRequest) {
     });
   }
 
-  // إذا لم يكن هناك لغة في المسار، قم بإعادة التوجيه إلى اللغة المناسبة
+  // If no locale in path, redirect to appropriate locale
   const locale = getLocale(request);
-  return NextResponse.redirect(
-    new URL(`/${locale}${pathname || "/"}`, request.url)
-  );
+  const newUrl = new URL(`/${locale}${pathname || "/"}`, request.url);
+  
+  // Preserve query parameters
+  request.nextUrl.searchParams.forEach((value, key) => {
+    newUrl.searchParams.set(key, value);
+  });
+  
+  return NextResponse.redirect(newUrl);
 }
 
 export const config = {
-  matcher: "/((?!api|_next/static|_next/image|favicon.ico).*)",
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

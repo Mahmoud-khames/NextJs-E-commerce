@@ -127,9 +127,9 @@ console.log(req.body);
       // تحديث المستخدم
       const updatedUser = await userModel.findByIdAndUpdate(uId, updateData, {
         new: true,
-        runValidators: true,
-      });
-
+        runValidators: true, 
+      }); 
+ 
       res.status(200).json({
         success: true,
         message: "User updated successfully",
@@ -157,7 +157,7 @@ console.log(req.body);
     } 
   }
 
-  async changePassword(req, res, next) {
+  async changePassword(req, res, next) { 
     let { uId, oldPassword, newPassword } = req.body;
     if (!uId || !oldPassword || !newPassword) {
       return next(new AppError("All filled must be required", 400));
@@ -180,6 +180,19 @@ console.log(req.body);
           return next(new AppError("Your old password is wrong!!", 400));
         }
       }
+    }
+  }
+
+  async getUsersCount(req, res, next) {
+    try {
+      const count = await userModel.countDocuments({ isDeleted: false });
+      res.status(200).json({
+        success: true,
+        count
+      });
+    } catch (error) {
+      console.error("Error counting users:", error);
+      next(new AppError("Failed to count users", 500));
     }
   }
  

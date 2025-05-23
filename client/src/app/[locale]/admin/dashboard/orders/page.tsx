@@ -1,32 +1,15 @@
-"use client";
+import React from 'react'
+import OrdersTable from './_components/OrderTable';
+import { getCurrentLocale } from '@/lib/getCurrentLocale';
+import getTrans from '@/lib/translation';
 
-import React from "react";
+export default async function page() {
+  const locale = await getCurrentLocale();
 
-export default function OrdersPage() {
+  const { t } = await getTrans(locale);
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4">Manage Orders</h2>
-      <div className="bg-white p-4 rounded shadow">
-        <table className="w-full">
-          <thead>
-            <tr>
-              <th className="text-left p-2">Order ID</th>
-              <th className="text-left p-2">Customer</th>
-              <th className="text-left p-2">Total</th>
-              <th className="text-left p-2">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="p-2">1001</td>
-              <td className="p-2">John Doe</td>
-              <td className="p-2">$199.99</td>
-              <td className="p-2">Pending</td>
-            </tr>
-            {/* Add more rows dynamically */}
-          </tbody>
-        </table>
-      </div>
+      <OrdersTable t={t} locale={locale} />
     </div>
-  );
+  )
 }

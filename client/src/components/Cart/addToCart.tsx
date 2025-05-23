@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { addItemToCart, addToCartAsync } from "@/redux/features/cart/cartSlice";
@@ -9,16 +8,18 @@ import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import getTrans from "@/lib/translation";
 
-export default function AddToCart({
-  product,
+export default function AddToCart({ 
+  product, 
   quantity = 1,
-  size,
-  color
-}: {
+  selectedSize = null,
+  selectedColor = null,
+  disabled = false
+}: { 
   product: IProduct;
   quantity?: number;
-  size?: string;
-  color?: string;
+  selectedSize?: string | null;
+  selectedColor?: string | null;
+  disabled?: boolean;
 }) {
   const dispatch = useAppDispatch();
   const { locale } = useParams();
@@ -44,19 +45,32 @@ export default function AddToCart({
   }, [locale]);
 
   const handleAddToCart = () => {
+    if (disabled) {
+      // إذا كان هناك مقاسات أو ألوان ولم يتم تحديد أي منها
+      if (product.productSizes && product.productSizes.length > 0 && !selectedSize) {
+        toast.warning(translations?.cart?.selectSize || "Please select a size");
+        return;
+      }
+      if (product.productColors && product.productColors.length > 0 && !selectedColor) {
+        toast.warning(translations?.cart?.selectColor || "Please select a color");
+        return;
+      }
+    }
+
     if (isLoggedIn) {
       // Use the async thunk if logged in
       dispatch(addToCartAsync({ 
         productId: product._id, 
         quantity, 
-        size, 
-        color,
-        price: product.productPrice
+        size: selectedSize, 
+        color: selectedColor,
+        price: product.productPrice,
+        discount: product.productDiscountPrice ? product.productPrice - product.productDiscountPrice : 0
       }));
       
     } else {
       // Use local state if not logged in
-      dispatch(addItemToCart({ product, quantity, size, color }));
+      dispatch(addItemToCart({ product, quantity, size: selectedSize, color: selectedColor }));
       toast.success(`${product.productName} (${quantity}) ${translations?.cart?.addedToCart || "added to cart!"}`);
     }
   };
@@ -77,7 +91,10 @@ export default function AddToCart({
   return (
     <button
       onClick={handleAddToCart}
-      className="w-full h-full text-white rounded-xl"
+      disabled={disabled}
+      className={`w-full h-full flex items-center justify-center transition-colors duration-300 ${
+        disabled ? "bg-gray-400 cursor-not-allowed" : "hover:bg-secondary"
+      }`}
     >
       {translations?.cart?.addToCart || "Add To Cart"}
     </button>

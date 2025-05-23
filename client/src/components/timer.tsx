@@ -1,25 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import getTrans from "@/lib/translation";
 
-interface TimerProps {
-  initialTime?: {
-    days: number;
-    hours: number;
-    minutes: number;
-    seconds: number;
-  };
-  onEnd?: () => void; // Callback when timer reaches 0
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
 }
 
-export default function Timer({
-  initialTime = { days: 3, hours: 23, minutes: 19, seconds: 56 },
-  onEnd,
-}: TimerProps) {
-  const [timeLeft, setTimeLeft] = useState(initialTime);
+interface Progress {
+  totalDuration: number;
+  elapsedDuration: number;
+  percentComplete: number;
+}
+
+interface TimerProps {
+  initialTime: TimeLeft;
+  progress?: Progress;
+  onEnd?: () => void;
+}
+
+export default function Timer({ initialTime, progress, onEnd }: TimerProps) {
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(initialTime);
   const { locale } = useParams();
  
   const [translations, setTranslations] = useState<any>(null);
@@ -47,35 +53,17 @@ export default function Timer({
     fetchTranslations();
   }, [locale]);
 
-  // Countdown logic
+  // Update when initialTime changes
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        let { days, hours, minutes, seconds } = prev;
-        seconds--;
-        if (seconds < 0) {
-          seconds = 59;
-          minutes--;
-        }
-        if (minutes < 0) {
-          minutes = 59;
-          hours--;
-        }
-        if (hours < 0) {
-          hours = 23;
-          days--;
-        }
-        if (days < 0) {
-          clearInterval(timer);
-          if (onEnd) onEnd(); // Trigger callback when timer ends
-          return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-        }
-        return { days, hours, minutes, seconds };
-      });
-    }, 1000);
+    setTimeLeft(initialTime);
+  }, [
+    initialTime.days, 
+    initialTime.hours, 
+    initialTime.minutes, 
+    initialTime.seconds
+  ]);
 
-    return () => clearInterval(timer);
-  }, [onEnd]);
+  // No need for internal countdown logic as the parent component handles it
 
   // عرض حالة تحميل أثناء جلب الترجمة
   if (!translations) {

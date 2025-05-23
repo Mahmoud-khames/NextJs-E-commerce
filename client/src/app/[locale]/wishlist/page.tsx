@@ -2,6 +2,18 @@ import Link from "next/link";
 import WishListItems from "./_component/WishListItems";
 import { getCurrentLocale } from "@/lib/getCurrentLocale";
 import Trans from "@/components/trans";
+import { Metadata } from "next";
+import { getDictionary } from "@/lib/dictionary";
+import { Locale } from "@/i18n.config";
+
+export async function generateMetadata({ params }: { params: { locale: Locale } }): Promise<Metadata> {
+  const dictionary = await getDictionary(params.locale);
+  
+  return {
+    title: dictionary.metadata.wishlist.title,
+    description: dictionary.metadata.wishlist.description,
+  };
+}
 
 export default async function WishlistPage() {
   const t = await Trans();

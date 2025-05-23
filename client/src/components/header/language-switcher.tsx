@@ -17,23 +17,13 @@ const LanguageSwitcher = () => {
 
   return (
     <div className="flex">
-      {locale === Languages.ARABIC ? (
-        <Button
-          variant="outline"
-          onClick={() => switchLanguage(Languages.ENGLISH)}
-          className="cursor-pointer hover:bg-secondary hover:text-white"
-        >
-          English
-        </Button>
-      ) : (
-        <Button
-          variant="outline"
-          onClick={() => switchLanguage(Languages.ARABIC)}
-          className="cursor-pointer hover:bg-secondary hover:text-white"
-        >
-          العربية
-        </Button>
-      )}
+      <Button
+        variant="outline"
+        onClick={() => switchLanguage(locale === Languages.ARABIC ? Languages.ENGLISH : Languages.ARABIC)}
+        className="cursor-pointer hover:bg-secondary hover:text-white text-xs md:text-sm py-1 px-2 md:py-2 md:px-3 h-auto"
+      >
+        {locale === Languages.ARABIC ? "English" : "العربية"}
+      </Button>
     </div>
   );
 };

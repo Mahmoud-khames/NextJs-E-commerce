@@ -9,11 +9,7 @@ import { usePathname } from "next/navigation";
 export default function Sidebar( {t , locale}  : {t: any, locale: string}) {
   const navItems = [
     { title: t.account.myProfile, href: Routes.PROFILE },
-    { title: t.account.addressBook, href: "#" },
-    { title: t.account.myPaymentOptions, href: "#" },
-    { title: t.account.myOrders, href: "#" },
-    { title: t.account.myReturns, href: "#" },
-    { title: t.account.myCancellations, href: "#" },
+    { title: t.account.myOrders, href: Routes.ORDERS },
     { title: t.account.myWishlist, href: Routes.WISHLIST },
   ];
   // const { t } = useTranslation();

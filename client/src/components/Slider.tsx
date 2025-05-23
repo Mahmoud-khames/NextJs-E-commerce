@@ -2,7 +2,8 @@
 import { Directions, Languages } from "@/constants/enums";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { useIsMobile } from "@/Hooks/use-mobile";
 
 interface SliderProps {
   children: React.ReactNode;
@@ -12,59 +13,103 @@ export default function Slider({ children }: SliderProps) {
   const sliderRef = useRef<HTMLDivElement>(null);
   const [isAtStart, setIsAtStart] = useState(true);
   const [isAtEnd, setIsAtEnd] = useState(false);
-const {locale} = useParams()
+  const { locale } = useParams();
+  const isRTL = locale === Languages.ARABIC;
+  const isMobile = useIsMobile();
+
   const checkScrollPosition = () => {
     if (sliderRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
-      setIsAtStart(scrollLeft === 0);
-      setIsAtEnd(scrollLeft + clientWidth >= scrollWidth - 1);
+
+      // For RTL, the scrollLeft is negative and starts from the right
+      if (isRTL) {
+        const maxScroll = Math.abs(scrollWidth - clientWidth);
+        setIsAtStart(Math.abs(scrollLeft) < 10);
+        setIsAtEnd(Math.abs(scrollLeft) >= maxScroll - 10);
+      } else {
+        setIsAtStart(scrollLeft <= 0);
+        setIsAtEnd(scrollLeft + clientWidth >= scrollWidth - 10);
+      }
     }
   };
 
-  const scrollLeft = () => {
+  useEffect(() => {
+    checkScrollPosition();
+    // Reset scroll position when language changes
     if (sliderRef.current) {
-      sliderRef.current.scrollBy({ left: -270, behavior: "smooth" });
-      setTimeout(checkScrollPosition, 300);
+      sliderRef.current.scrollLeft = 0;
     }
-  };
 
-  const scrollRight = () => {
+    // Add resize listener to check scroll position on window resize
+    window.addEventListener("resize", checkScrollPosition);
+    return () => window.removeEventListener("resize", checkScrollPosition);
+  }, [locale]);
+
+  const scroll = (direction: "left" | "right") => {
     if (sliderRef.current) {
-      sliderRef.current.scrollBy({ left: 270, behavior: "smooth" });
+      // Adjust scroll value based on screen size
+      const scrollAmount = isMobile ? 140 : 270;
+      // Adjust scroll direction based on language
+      const scrollValue =
+        scrollAmount * (direction === "right" ? 1 : -1) * (isRTL ? -1 : 1);
+      sliderRef.current.scrollBy({ left: scrollValue, behavior: "smooth" });
       setTimeout(checkScrollPosition, 300);
     }
   };
 
   return (
-    <div className="relative w-full " dir={locale === Languages.ARABIC ? Directions.RTL : Directions.LTR}>
+    <div
+      className="relative w-full"
+      dir={isRTL ? Directions.RTL : Directions.LTR}
+    >
       <div
         ref={sliderRef}
-        className="flex w-full gap-[30px] overflow-hidden scroll-smooth snap-x snap-mandatory scrollbar-hide overflow-y-hidden"
+        className="flex w-full gap-4 md:gap-[30px] overflow-hidden scroll-smooth snap-x snap-mandatory scrollbar-hide py-2"
         onScroll={checkScrollPosition}
+        style={{ WebkitOverflowScrolling: "touch" }}
       >
         {children}
       </div>
 
-      {/* Left Arrow */}
+      {/* Navigation buttons */}
       <button
-        onClick={scrollLeft}
+        onClick={() => scroll("left")}
         disabled={isAtStart}
-        className={`absolute cursor-pointer ${locale === Languages.ARABIC ?"left-0 md:left-[-2%]" : "right-0 md:right-[-2%]" } top-1/2  md:-top-20 transform -translate-y-1/2 bg-gray-300 text-white  w-11 h-11 flex items-center justify-center rounded-full transition-opacity ${
-          locale === Languages.ARABIC ? isAtStart ? "opacity-20" : "opacity-100 hover:bg-gray-400" : isAtStart ? "opacity-20" : "opacity-100 hover:bg-gray-400"
-        }`}
+        className={`absolute z-10 cursor-pointer top-1/2 transform -translate-y-1/2 
+          bg-gray-300 text-white w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-opacity
+          ${isRTL ? "right-0" : "left-0"}
+          ${
+            isAtStart
+              ? "opacity-0 pointer-events-none"
+              : "opacity-80 hover:opacity-100 hover:bg-gray-400"
+          }`}
+        aria-label="Previous"
       >
-        <ArrowLeft className="w-6 h-6 text-black" />
+        {isRTL ? (
+          <ArrowRight className="w-4 h-4 md:w-6 md:h-6 text-black" />
+        ) : (
+          <ArrowLeft className="w-4 h-4 md:w-6 md:h-6 text-black" />
+        )}
       </button>
 
-      {/* Right Arrow */}
       <button
-        onClick={scrollRight}
-        disabled={isAtEnd }
-        className={`absolute cursor-pointer ${locale === Languages.ARABIC ?"right-0 md:right-[92%]" : "left-0 md:left-[92%]" }  top-1/2  md:-top-20   transform -translate-y-1/2 bg-gray-300 text-white w-11 h-11 flex items-center justify-center  rounded-full transition-opacity ${
-          locale === Languages.ARABIC ? isAtEnd ? "opacity-20" : "opacity-100 hover:bg-gray-400" : isAtEnd ? "opacity-20" : "opacity-100 hover:bg-gray-400"
-        }`}
+        onClick={() => scroll("right")}
+        disabled={isAtEnd}
+        className={`absolute z-10 cursor-pointer top-1/2 transform -translate-y-1/2 
+          bg-gray-300 text-white w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full transition-opacity
+          ${isRTL ? "left-0" : "right-0"}
+          ${
+            isAtEnd
+              ? "opacity-0 pointer-events-none"
+              : "opacity-80 hover:opacity-100 hover:bg-gray-400"
+          }`}
+        aria-label="Next"
       >
-        <ArrowRight className="w-6 h-6  text-black" />
+        {isRTL ? (
+          <ArrowLeft className="w-4 h-4 md:w-6 md:h-6 text-black" />
+        ) : (
+          <ArrowRight className="w-4 h-4 md:w-6 md:h-6 text-black" />
+        )}
       </button>
     </div>
   );

@@ -1,7 +1,15 @@
 import { Pages, Routes } from "@/constants/enums";
-import { Home, Monitor, Phone, Package, Users, ListOrdered, BookPlus, BadgeDollarSign, Columns3Icon   } from "lucide-react";
+import { Home, Monitor, Phone, Package, Users   } from "lucide-react";
 import { Camera, Headphones, Watch } from "lucide-react";
 import { Gamepad } from "lucide-react";
+import { 
+  LayoutDashboard, 
+  ShoppingBag, 
+
+  Tag, 
+  Settings, 
+  BarChart 
+} from "lucide-react";
 
 export const navBar = [
   // {
@@ -65,169 +73,7 @@ export const FilterData = [
     title: "Health & Beauty",
   },
 ];
-const gamingProducts = [
-  {
-    id: 1,
-    name: "HAVIT HV-G92 Gamepad",
-    description: "Fabric gaming chair with a 24-inch 144Hz monitor",
-    price: 300,
-    oldPrice: 350,
-    rate: 3.5,
-    discount: true,
-    ndiscount: 50,
-    reviews: 100,
-    image: "/controlle.png",
-    slug: "havit-hv-g92-gamepad",
-    images: [
-      "/controlle.png",
-      "/controlle.png",
-      "/controlle.png",
-      "/controlle.png",
-    ],
-    colors: ["red", "blue", "green", "yellow"],
-    sizes: ["S", "M", "L", "XL"],
-  },
-  {
-    id: 2,
-    name: "AK-900 Wired Keyboard",
-    description:
-      "Gaming chair with synthetic leather and a 32-inch curved 165Hz monitor",
-    price: 450,
-    oldPrice: 500,
-    rate: 1.5,
-    discount: true,
-    ndiscount: 30,
-    reviews: 50,
-    image: "/k.png",
-    slug: "ak-900-wired-keyboard",
-    images: ["/k.png", "/k.png", "/k.png", "/k.png"],
-    colors: ["red", "blue", "green", "yellow"],
-    sizes: ["S", "M", "L", "XL"],
-  },
-  {
-    id: 3,
-    name: "IPS LCD Gaming Monitor 24.5 inch",
-    description: "Luxury chair with ergonomic design and a 27-inch 4K monitor",
-    price: 1800,
-    oldPrice: 2000,
-    rate: 2.5,
-    discount: true,
-    ndiscount: 40,
-    reviews: 200,
-    image: "/sc.png",
-    slug: "ips-lcd-gaming-monitor-245-inch",
-    images: ["/sc.png", "/sc.png", "/sc.png", "/sc.png"],
-    colors: ["red", "blue", "yellow"],
-    sizes: ["S", "M", "L"],
-  },
-  {
-    id: 4,
-    name: "S-Series Comfort Chair ",
-    description: "Luxury chair with ergonomic design and a 27-inch 4K monitor",
-    price: 1800,
-    oldPrice: 2000,
-    rate: 2.5,
-    discount: true,
-    ndiscount: 40,
-    reviews: 200,
-    image: "/cH.png",
-    slug: "s-series-comfort-chair",
-    images: ["/cH.png", "/cH.png", "/cH.png", "/cH.png"],
-    colors: ["red", "blue", "green", "yellow"],
-    sizes: ["S", "M", "XL"],
-  },
-  {
-    id: 5,
-    name: "The north coat",
-    description: "Fabric gaming chair with a 24-inch 144Hz monitor",
-    price: 300,
-    oldPrice: 350,
-    rate: 3.5,
-    discount: true,
-    ndiscount: 50,
-    reviews: 100,
-    image: "/Tsh.png",
-    slug: "the-north-coat",
-    images: ["/Tsh.png", "/Tsh.png", "/Tsh.png", "/Tsh.png"],
-    colors: ["red", "green", "yellow"],
-    sizes: ["S", "M", "L", "XL"],
-  },
-  {
-    id: 6,
-    name: "Gucci duffle bag",
-    description: "Fabric gaming chair with a 24-inch 144Hz monitor",
-    price: 300,
-    oldPrice: 350,
-    rate: 3.5,
-    discount: true,
-    ndiscount: 50,
-    reviews: 100,
-    image: "/Bage.png",
-    slug: "gucci-duffle-bag",
-    images: ["/Bage.png", "/Bage.png", "/Bage.png", "/Bage.png"],
-    colors: ["green", "yellow"],
-    sizes: ["S", "M", "L", "XL"],
-  },
 
-  {
-    id: 7,
-    name: "RGB liquid CPU Cooler",
-    description: "Fabric gaming chair with a 24-inch 144Hz monitor",
-    price: 300,
-    oldPrice: 350,
-    rate: 3.5,
-    discount: true,
-    ndiscount: 50,
-    reviews: 100,
-    image: "/sound.png",
-    slug: "rgb-liquid-cpu-cooler",
-    images: ["/sound.png", "/sound.png", "/sound.png", "/sound.png"],
-    colors: ["blue", "green", "yellow"],
-    sizes: ["S", "M", "L", "XL"],
-  },
-
-  {
-    id: 8,
-    name: "Small BookSelf",
-    description: "Fabric gaming chair with a 24-inch 144Hz monitor",
-    price: 300,
-    oldPrice: 0,
-    rate: 3.5,
-    discount: false,
-    ndiscount: 50,
-    reviews: 100,
-    new: true,
-    image: "/office.png",
-    slug: "small-bookself",
-    images: ["/office.png", "/office.png", "/office.png", "/office.png"],
-    colors: ["red", "blue", "green"],
-    sizes: ["S", "M", "L", "XL"],
-  },
-  {
-    id: 9,
-    name: "DXRacer Master Series",
-    description:
-      "Gaming chair with synthetic leather and a 32-inch curved 165Hz monitor",
-    price: 450,
-    oldPrice: 0,
-    rate: 1.5,
-    discount: false,
-    ndiscount: 30,
-    reviews: 50,
-    new: true,
-    image:
-      "https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    slug: "dxracer-master-series",
-    images: [
-      "https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      "https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      "https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      "https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    ],
-    colors: ["red", "blue"],
-    sizes: ["S", "M"],
-  },
-];
 
 export const Categories = [
   {
@@ -267,45 +113,51 @@ export const AdminDashboard = [
     id: 1,
     name: "Dashboard",
     url: Routes.ADMIN_DASHBOARD,
-    icon: <Home  strokeWidth={1} />,
+    icon: <LayoutDashboard className="h-5 w-5" />,
+    nameAr: "لوحة التحكم"
   },
   {
     id: 2,
     name: "Products",
     url: Routes.ADMIN_PRODUCTS,
-    icon: <Package  strokeWidth={1} />,
+    icon: <ShoppingBag className="h-5 w-5" />,
+    nameAr: "المنتجات"
   },
   {
     id: 3,
-    name: "Orders",
-    url: Routes.ADMIN_ORDERS,
-    icon: <ListOrdered strokeWidth={1} />,
+    name: "Categories",
+    url: Routes.ADMIN_CATEGORIES,
+    icon: <Package className="h-5 w-5" />,
+    nameAr: "التصنيفات"
   },
   {
     id: 4,
-    name: "Users",
-    url: Routes.ADMIN_USERS,
-    icon: <Users  strokeWidth={1} />,
+    name: "Orders",
+    url: Routes.ADMIN_ORDERS,
+    icon: <BarChart className="h-5 w-5" />,
+    nameAr: "الطلبات"
   },
   {
     id: 5,
-    name: "Categories",
-    url: Routes.ADMIN_CATEGORIES,
-    icon: <BookPlus  strokeWidth={1} />,
+    name: "Coupons",
+    url: Routes.ADMIN_COUPONS,
+    icon: <Tag className="h-5 w-5" />,
+    nameAr: "الكوبونات"
   },
   {
     id: 6,
-    name: "Coupons",
-    url: Routes.ADMIN_COUPONS,
-    icon: <BadgeDollarSign  strokeWidth={1} />,
+    name: "Users",
+    url: Routes.ADMIN_USERS,
+    icon: <Users className="h-5 w-5" />,
+    nameAr: "المستخدمين"
   },
-  {
-    id: 7,
-    name: "Customize",
+{
+  id:7,
+  name: "Customize",
     url: Routes.ADMIN_CUSTOMIZE,
-    icon: <Columns3Icon  strokeWidth={1} />,
-  },
-
+    icon: <Settings className="h-5 w-5" />,
+    nameAr: "تخصيص"
+}
 ];  
 
-export default gamingProducts;
+

@@ -26,7 +26,7 @@ export enum Directions {
     ADMIN = "admin",
     DASHBOARD = "dashboard",
     USERS = "users",
-    ORDERS = "orders",
+    ORDERS = "profile/orders",
     REGISTER = "auth/signup",
     LOGIN = "auth/signin",
     FORGOT_PASSWORD = "auth/forgot-password",

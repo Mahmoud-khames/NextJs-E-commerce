@@ -29,7 +29,7 @@ export default function ProductsTable({
   const { products, status } = useAppSelector((state) => state.products);
 
   useEffect(() => {
-    dispatch(fetchProducts());
+    dispatch(fetchProducts({ applyFilters: false }));
   }, [dispatch]);
 
   // وظيفة لتقصير النص الطويل

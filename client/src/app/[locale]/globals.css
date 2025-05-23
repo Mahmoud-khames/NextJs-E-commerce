@@ -71,7 +71,7 @@
   --Text-foreground: #000000; /* لون النص داخل البطاقة */
   --popover: #00FF66; /* نافذة منبثقة */
   --popover-foreground: #000000; /* نص النافذة المنبثقة */
-  --primary: #1a73e8; /* اللون الأساسي (على سبيل المثال، الأزرق) */
+  --primary: #db4444; /* اللون الأساسي (على سبيل المثال، الأزرق) */
   --primary-foreground: #ffffff; /* اللون الأمامي للون الأساسي */
   --secondary: #db4444; /* اللون الثانوي (على سبيل المثال، البرتقالي) */
   --secondary-foreground: #ffffff; /* اللون الأمامي للون الثانوي */
@@ -147,4 +147,5 @@ body {
 button{
   cursor: pointer !important;
 }
+
 

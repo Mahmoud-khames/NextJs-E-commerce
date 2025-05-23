@@ -24,11 +24,11 @@ router.put(
   authMiddleware,
   reviewController.updateReviewByProductId
 );
-router.delete("/:productId", authMiddleware, reviewController.deleteReview);
+router.delete("/:id", authMiddleware, reviewController.deleteReview);
 router.post(
   "/uploadReviewImage",
-  upload.single("image"),
   authMiddleware,
+  upload.single("image"),
   reviewController.uploadReviewImage
 );
 

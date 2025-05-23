@@ -19,10 +19,20 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// Public routes (no authentication required)
+router.get("/filter", productController.filterProducts);
+router.get("/available-filters", productController.getAvailableFilters);
+router.get("/search", productController.searchProduct); // Add dedicated search endpoint
+router.get("/discounted", productController.getDiscountedProducts); // Make discounted products public
+router.get("/bestselling", productController.getBestSellingProducts); // Make best selling products public
+
+// Protected routes
 router.get("/", authMiddleware, productController.getAllProduct);
-router.get("/:slug", authMiddleware, productController.getProductBySlug); // Adjusted to :id
+router.get("/new", authMiddleware, productController.getNewProducts);
+router.get("/dashboard/count", authMiddleware, isAdmin, productController.getProductsCount);
+router.get("/:slug", productController.getProductBySlug);
 router.post(
-  "/", 
+  "/",
   authMiddleware,
   isAdmin,
   upload.any(), // Supports both productImage and productImages
@@ -47,6 +57,16 @@ router.get(
   productController.getProductByCategory
 );
 router.get("/search/:slug", authMiddleware, productController.searchProduct);
-router.get("/price/:price", authMiddleware, productController.getProductByPrice);
+router.get(
+  "/price/:price",
+  authMiddleware,
+  productController.getProductByPrice
+);
+router.post(
+  "/reset-expired-discounts",
+  authMiddleware,
+  isAdmin,
+  productController.resetExpiredDiscounts
+);
 
 module.exports = router;

@@ -59,11 +59,11 @@ export default function ImgProduct() {
   }, []);
 
   return (
-    <div className="w-full flex flex-col md:flex-row items-center justify-center my-20 bg-black h-auto md:h-[500px] gap-10 p-4">
+    <div className="w-full flex flex-col md:flex-row items-center justify-center my-10 md:my-20 bg-black h-auto md:h-[500px] gap-5 md:gap-10 p-4 md:p-8">
       {/* content */}
-      <div className="w-full md:w-[400px] h-full flex items-start flex-col gap-2 justify-center">
-        <h4 className="text-popover text-[16px] font-medium">Categories</h4>
-        <p className="md:text-[48px] text-[28px] font-semibold leading-[60px] text-white">
+      <div className="w-full md:w-[400px] h-full flex items-start flex-col gap-2 justify-center py-6 md:py-0">
+        <h4 className="text-popover text-[14px] md:text-[16px] font-medium">Categories</h4>
+        <p className="text-[24px] md:text-[28px] lg:text-[48px] font-semibold leading-tight md:leading-[60px] text-white">
           Enhance Your Music Experience
         </p>
 
@@ -104,22 +104,22 @@ export default function ImgProduct() {
         </div>
 
         {/* Buy Now Button */}
-        <button className="mt-6 bg-popover text-black font-semibold py-4 px-12 rounded cursor-pointer">
+        <button className="mt-4 md:mt-6 bg-popover text-black font-semibold py-3 md:py-4 px-8 md:px-12 rounded cursor-pointer text-sm md:text-base">
           Buy Now!
         </button>
       </div>
 
       {/* img */}
-      <div className="h-full flex items-center justify-center">
+      <div className="h-full flex items-center justify-center w-full md:w-auto">
         {isLoading && !imageLoaded ? (
-          <Skeleton className="w-[600px] h-[420px] rounded-md" />
+          <Skeleton className="w-full md:w-[600px] h-[300px] md:h-[420px] rounded-md" />
         ) : (
           <Image
             src={"/image.png"}
             alt="imgProduct"
             width={600}
             height={420}
-            className="drop-shadow-[0px_0px_100px_#FFFF]"
+            className="drop-shadow-[0px_0px_100px_#FFFF] w-full md:w-auto h-auto max-h-[300px] md:max-h-[420px] object-contain"
             onLoad={() => setImageLoaded(true)}
           />
         )}

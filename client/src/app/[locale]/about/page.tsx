@@ -1,4 +1,7 @@
 import Image from "next/image";
+import { Metadata } from "next";
+import { getDictionary } from "@/lib/dictionary";
+import { Locale } from "@/i18n.config";
 
 import React from "react";
 import { Facebook, Twitter, Linkedin, ShoppingBag, DollarSign, Briefcase, HandCoins } from "lucide-react"; // أيقونات السوشيال ميديا
@@ -6,6 +9,15 @@ import Link from "@/components/link";
 import getTrans from "@/lib/translation";
 import { getCurrentLocale } from "@/lib/getCurrentLocale";
 import { LanguageType } from "@/i18n.config";
+
+export async function generateMetadata({ params }: { params: { locale: Locale } }): Promise<Metadata> {
+  const dictionary = await getDictionary(params.locale);
+  
+  return {
+    title: dictionary.metadata.about.title,
+    description: dictionary.metadata.about.description,
+  };
+}
 
 export default async function About() {
   const locale = await getCurrentLocale();

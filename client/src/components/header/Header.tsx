@@ -50,14 +50,14 @@ export default function Header({ t }: any) {
         isScrolled ? "shadow-md" : ""
       }`}
     >
-      <nav className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between py-5">
+      <nav className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between py-3 md:py-5">
         {/* Logo */}
-        <Link href={`/${locale}`}>
-          <h1 className="text-Text-foreground font-bold text-2xl">{t.logo}</h1>
+        <Link href={`/${locale}`} className="flex-shrink-0">
+          <h1 className="text-Text-foreground font-bold text-xl md:text-2xl">{t.logo}</h1>
         </Link>
 
         {/* Desktop Navigation */}
-        <ul className="hidden md:flex items-center gap-8 text-black">
+        <ul className="hidden md:flex items-center gap-4 lg:gap-8 text-black">
           {navBar.map((item) => (
             <li key={item.id} className="capitalize">
               <Link
@@ -76,18 +76,17 @@ export default function Header({ t }: any) {
         </ul>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-6">
-          <div className="hidden md:block">
+        <div className="flex items-center gap-2 sm:gap-4 md:gap-6">
+          <div className="hidden md:block w-auto max-w-[200px] lg:max-w-none">
             <Search search={t.search} />
           </div>
 
-          <LoveProdects />
-
-          <ShoppingCartProduct />
-
-          {user && <User t={t} onLogout={handleLogout} />}
-
-          <LanguageSwitcher />
+          <div className="flex items-center gap-3 md:gap-6">
+            <LoveProdects />
+            <ShoppingCartProduct />
+            {user && <User t={t} onLogout={handleLogout} />}
+            <LanguageSwitcher />
+          </div>
 
           {/* Mobile Menu Icon */}
           <div
@@ -101,13 +100,13 @@ export default function Header({ t }: any) {
         {/* Mobile Navigation Overlay */}
         <div
           className={`
-            fixed top-0 left-0 w-full h-screen bg-white z-50 p-4 transition-all duration-300 ease-in-out
-            ${
-              isMobileMenuOpen
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 -translate-y-full pointer-events-none"
-            }
-          `}
+           fixed top-0 left-0 w-full h-screen bg-white z-50 p-4 transition-all duration-300 ease-in-out
+    ${
+      isMobileMenuOpen
+        ? "opacity-100 translate-y-0"
+        : "opacity-0 -translate-y-full pointer-events-none"
+    }
+  `}
         >
           <div className="flex justify-between items-start mb-6 w-full">
             <h1 className="text-2xl font-bold">Exclusive</h1>

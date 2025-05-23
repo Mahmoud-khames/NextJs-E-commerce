@@ -23,7 +23,7 @@ export default function DeleteProduct({ t, product}: {
       toast.success(t.admin.deleteProductSuccess);
       
       // أضف هذا السطر لتحديث القائمة
-      dispatch(fetchProducts());
+      dispatch(fetchProducts({ applyFilters: false }));
       
     } catch (error) {
       toast.error(t.admin.deleteProductError);

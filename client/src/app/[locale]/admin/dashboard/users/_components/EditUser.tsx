@@ -134,7 +134,7 @@ export default function EditUser({
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="flex items-center gap-1">
           <Pencil className="h-4 w-4" />
-          {t.admin.edit || "Edit"}
+          {t.common.edit || "Edit"}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">

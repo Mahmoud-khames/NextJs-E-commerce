@@ -1,20 +1,25 @@
 import React from "react";
 import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react"; 
 import Link from "@/components/link";
+import { getCurrentLocale } from "@/lib/getCurrentLocale";
+import getTrans from "@/lib/translation";
+import { LanguageType } from "@/i18n.config";
 
-export default function Footer() {
+export default async function Footer() {
+  const locale = await getCurrentLocale();  
+  const { t } = await getTrans(locale as LanguageType);
   return (
     <footer className="bg-black text-white py-10 relative bottom-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4">Exclusive</h3>
-            <p className="mb-4">Subscribe</p>
-            <p className="mb-4">Get 10% off your first order</p>
+            <h3 className="text-lg font-semibold mb-4">{t.navigation.logo}</h3>
+            <p className="mb-4">{t.general.subscribe}</p>
+            <p className="mb-4">{t.general.getDiscount}</p>
             <div className="flex items-center border border-white rounded-md p-2">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t.general.enterEmail}
                 className="bg-transparent text-white placeholder-white outline-none w-full"
               />
               <svg
@@ -35,82 +40,81 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4">Support</h3>
+            <h3 className="text-lg font-semibold mb-4">{t.general.support}</h3>
             <p className="mb-2">
-              Address: Alexandria, Egypt
+              {t.general.address}
             </p>
             <p
               className="mb-2 !text-wrap"
             >
-              mahmoudkhames.dev<br />@gmail.com
+              {t.general.email}
             </p>
-            <p>+01227063324</p>
+            <p>{t.general.phone}</p>
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4">Account</h3>
+            <h3 className="text-lg font-semibold mb-4">{t.general.account}</h3>
             <ul className="space-y-2">
               <li>
                 <a href="#" className="hover:underline">
-                  My Account
+                  {t.general.myAccount}
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:underline">
-                  Login / Register
+                  {t.general.loginRegister}
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:underline">
-                  Cart
+                  {t.navigation.cart}
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:underline">
-                  Wishlist
+                  {t.navigation.wishlist}
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:underline">
-                  Shop
+                  {t.general.shop}
                 </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Link</h3>
+            <h3 className="text-lg font-semibold mb-4">{t.general.quickLink}</h3>
             <ul className="space-y-2">
               <li>
                 <a href="#" className="hover:underline">
-                  Privacy Policy
+                  {t.general.privacyPolicy}
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:underline">
-                  Terms Of Use
+                  {t.general.termsOfUse}
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:underline">
-                  FAQ
+                  {t.general.faq}
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:underline">
-                  Contact
+                  {t.navigation.contact}
                 </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4">Download App</h3>
-            <p className="mb-2">Save $3 with App New User Only</p>
+            <h3 className="text-lg font-semibold mb-4">{t.general.downloadApp}</h3>
+            <p className="mb-2">{t.general.saveWithApp}</p>
             <div className="flex space-x-2 mb-4">
-              {/* QR Code - ممكن تضيف صورة QR Code هنا */}
               <div className="w-20 h-20 bg-gray-300 flex items-center justify-center">
-                <span className="text-gray-600">QR Code</span>
+                <span className="text-gray-600">{t.general.qrCode}</span>
               </div>
               <div className="flex flex-col space-y-2">
                 <a href="#" className="block">
@@ -148,7 +152,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-600 mt-8 pt-4 text-center text-gray-400 text-sm">
-          © Copyright 2025. All right reserved
+          {t.general.copyright}
         </div>
       </div>
     </footer>

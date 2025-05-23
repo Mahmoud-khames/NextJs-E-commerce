@@ -5,15 +5,24 @@ export interface IProduct {
   productPrice: number;
   productDescription: string;
   productImage: string;
-  productCategory: string;
+  productCategory: {
+    _id: string;
+    name: string;
+  } | string;
   productRating: number;
-  productReviews: []; 
+  productReviews: any[]; 
   productQuantity: number;
   productStatus: boolean;
   productImages: string[];
   oldProductPrice: number;
   productDiscount: number;
   productDiscountPrice: number;
+  productDiscountPercentage: number;
+  productDiscountStartDate: string | null;
+  productDiscountEndDate: string | null;
   productColors: string[];
-  productSlug: string;  
+  productSlug: string;
+  hasActiveDiscount: boolean;
+  NEW: boolean;
+  newUntil: string | null;
 }

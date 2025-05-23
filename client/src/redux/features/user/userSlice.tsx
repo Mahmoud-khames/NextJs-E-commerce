@@ -2,15 +2,17 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { RootState } from "@/redux/store";
 import { clearCart, fetchCartItems } from "../cart/cartSlice";
 import { clearWishlist } from "../wishList/wishlistSlice";
-import { getUsers } from "@/server";
+import { getUsers, updateUser } from "@/server";
 
 interface User {
-  id: string;
+  _id: string;
   firstName: string;
   lastName: string;
   email: string;
   role: string;
   token: string;
+  phone?: string;
+  userImage?: string;
 }
 
 interface UserState {
@@ -35,10 +37,22 @@ export const fetchUsers = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await getUsers();
-      console.log(response.data.users);
       return response.data.users;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || "Failed to fetch users");
+    }
+  }
+);
+
+// إضافة updateUserProfile كـ createAsyncThunk
+export const updateUserProfile = createAsyncThunk(
+  "user/updateUserProfile",
+  async (formData: FormData, { rejectWithValue }) => {
+    try {
+      const response = await updateUser(formData);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to update profile");
     }
   }
 );
@@ -53,6 +67,17 @@ const userSlice = createSlice({
       state.isLoading = false;
       state.error = null;
       state.success = "Login successful";
+    },
+    updateUserState: (state, action) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+        // Update user in localStorage if it exists there
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          localStorage.setItem("user", JSON.stringify({ ...parsedUser, ...action.payload }));
+        }
+      }
     },
     logout: (state) => {
       state.user = null;
@@ -87,10 +112,48 @@ const userSlice = createSlice({
       .addCase(fetchUsers.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      // Handle updateUserProfile actions
+      .addCase(updateUserProfile.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (state.user && action.payload.user) {
+          // Update user state with the new data
+          state.user = {
+            ...state.user,
+            firstName: action.payload.user.firstName,
+            lastName: action.payload.user.lastName,
+            email: action.payload.user.email,
+            phone: action.payload.user.phone,
+            userImage: action.payload.user.userImage,
+          };
+          
+          // Update user in localStorage if it exists
+          const storedUser = localStorage.getItem("user");
+          if (storedUser) {
+            const parsedUser = JSON.parse(storedUser);
+            localStorage.setItem("user", JSON.stringify({
+              ...parsedUser,
+              firstName: action.payload.user.firstName,
+              lastName: action.payload.user.lastName,
+              email: action.payload.user.email,
+              phone: action.payload.user.phone,
+              userImage: action.payload.user.userImage,
+            }));
+          }
+        }
+        state.success = action.payload.message || "Profile updated successfully";
+      })
+      .addCase(updateUserProfile.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   },
 });
 
-export const { setUser, logout, setIsLoading, setError, setSuccess } = userSlice.actions;
+export const { setUser, updateUserState, logout, setIsLoading, setError, setSuccess } = userSlice.actions;
 export default userSlice.reducer;
 export const userSelector = (state: RootState) => state.user;

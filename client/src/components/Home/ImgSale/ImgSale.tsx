@@ -31,11 +31,11 @@ export default function ImgSale() {
           setImages(slideImages);
         } else {
           console.warn("No images found in response, using fallback images.");
-          setImages(["/bg.jpg", "/bg2.jpg", "/bg3.jpg"]); // Fallback to static images if none are fetched
+          setImages([]); // Fallback to static images if none are fetched
         }
       } catch (error: any) {
         console.error("Error fetching images for ImgSale:", error);
-        setImages(["/bg.jpg", "/bg2.jpg", "/bg3.jpg"]); // Fallback on error
+        setImages([]); // Fallback on error
       } finally {
         setIsLoading(false);
       }
@@ -55,39 +55,46 @@ export default function ImgSale() {
 
   // Render Swiper with fetched images
   return (
-    <div className="flex flex-1 items-center justify-center w-full">
+    <div className="w-full h-full">
       <Swiper
-        pagination={{ clickable: true }}
-        autoplay={{
-          delay: 3000,
-          disableOnInteraction: false,
-        }}
-        loop={true}
         modules={[Pagination, Autoplay]}
-        className="mySwiper w-[892px] h-[344px]"
+        pagination={{ clickable: true }}
+        autoplay={{ delay: 5000, disableOnInteraction: false }}
+        spaceBetween={0}
+        slidesPerView={1}
+        className="w-full h-[200px] sm:h-[250px] md:h-[300px] lg:h-[344px]"
       >
-        {images.length > 0 ? (
+        {isLoading ? (
+          <SwiperSlide>
+            <div className="w-full h-full flex items-center justify-center">
+              <Skeleton className="w-full h-full rounded-md" />
+            </div>
+          </SwiperSlide>
+        ) : images.length > 0 ? (
           images.map((image, index) => (
             <SwiperSlide key={index}>
-              <Image
-                src={`${apiURL}${image}`} // Prepend the API URL to the relative image path
-                alt={`Sale Image ${index + 1}`}
-                width={892}
-                height={344}
-                priority
-                quality={75}
-                className="object-cover w-full h-full rounded-md"
-                onError={(e) => {
-                  console.error(`Error loading image: ${apiURL}${image}`);
-                  e.currentTarget.src = "/bg.jpg"; // Fallback image on error
-                }}
-              />
+              <div className="relative w-full h-full">
+                <Image
+                  src={`${apiURL}${image}`}
+                  alt={`Slide ${index + 1}`}
+                  fill
+                  className="object-cover object-center"
+                  priority={index === 0}
+                />
+              </div>
             </SwiperSlide>
           ))
         ) : (
+          // Fallback static image
           <SwiperSlide>
-            <div className="w-full h-full flex items-center justify-center bg-gray-200 rounded-md">
-              <p>No images available</p>
+            <div className="relative w-full h-full">
+              <Image
+                src="/placeholder-banner.jpg"
+                alt="Default banner"
+                fill
+                className="object-cover object-center"
+                priority
+              />
             </div>
           </SwiperSlide>
         )}
